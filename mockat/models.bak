@@ -1,0 +1,114 @@
+from django.db import models
+
+# Create your models here.
+def emptyjson():
+    return {"type":"none"}
+
+class Target(models.Model):
+    name  = models.CharField(max_length=100)
+    pRA = models.FloatField('RAsc',blank=True)
+    pdec = models.FloatField('Decl',blank=True)
+    mag1 = models.FloatField('magNUV1',blank=True,default=0)
+    mag2 = models.FloatField('magNUV2',blank=True,default=0)
+    mag3 = models.FloatField('magFUV',blank=True,default=0)
+    mag0 = models.FloatField('magB',blank=True,default=0)
+    group = models.CharField(max_length=20)
+    prior = models.FloatField('priority',blank=True,default=0)
+    notes = models.JSONField('notes',blank=True, default=emptyjson)
+    infield = models.CharField('targets close',max_length=200,blank=True)
+    nearby = models.CharField('targets near',max_length=400,blank=True)#models.ManyToManyField(Target)
+    class Meta:
+        ordering=["name"]
+        get_latest_by = "name"
+
+    def __repr__(self):
+        return self.name
+        
+    def __str__(self):
+        return self.name
+        
+    def get_coor(self):
+        import request
+        return 'ok'
+        
+    def get_pos(self):
+        '''position in astropy format'''
+        from astropy import coordinates as coord,units as u
+        self.pos=coord.ICRS(ra=self.pRA*u.degree,dec=self.pdec*u.degree)
+        return self.pos
+        
+    def set_pos(self,pos):
+        self.pRA=pos.ra.degree
+        self.pdec=pos.dec.degree
+        self.save()
+        
+    def get_near(self,dist=0):
+        '''list of nearby targets 
+        dist=0: only in FoV
+        dist>0: also around (next pointing)
+        '''
+        tlist=[Target.object.get(pk=int(a)) for a in self.infield.split(',')]
+        if dist>0:
+            tlist+=[Target.object.get(pk=int(a)) for a in self.nearby.split(',')]
+        return tlist
+        
+    def all_plans(self,unit='min'):
+        if self.objective_set.count()==0: return 0
+        total=sum([oo.totime() for oo in self.objective_set.all()])
+        if unit=='min': total/=60
+        elif unit[0]=='h': total/=3600
+        return total
+    
+    def expos(self,line=0):
+        sel=self.schedule_set
+        if line>0: sel=sel.filter(time=line)
+        if sel.count()==0: return 0
+        return sum([s.expo for s in sel.all()])
+
+class Schedule(models.Model):
+    class Meta:
+        ordering=["date"]
+        get_latest_by = "date"
+
+    time = models.FloatField('start')
+    expo = models.FloatField('exposure')
+
+    date = models.DateTimeField('planned')
+    target = models.ForeignKey(Target,blank=True,null=True,on_delete=models.CASCADE)
+
+    def end(self):
+        from datetime import timedelta
+        return self.date+timedelta(0,self.expo)
+    
+    def orient(self,horiz=True):
+        '''set pointing and calculate relevant values (Alt/Az, sun distance)
+        '''
+        from tools import sat_pos,sun_pos,rad2deg
+        from datetime import timedelta
+        tm=self.date+timedelta(0,self.expo/2)
+        pos=sat_pos(tm)
+        b,l=self.target.notes.get('eclipt_bl',[0,90])
+        from np import cos,deg2rad,arccos
+        cdis=lambda b0,l0:cos(deg2rad(b0))*cos(deg2rad(l0))
+        self.sundis=rad2deg(arccos(cdis(b-sun_pos(tm),l)))
+        if not horiz: return
+        from astropy import coordinates as coor
+        loc=coor.AltAz(obstime=Time(tm),location=pos)
+        self.altaz=self.target.get_pos().transform_to(loc)    
+
+    def __repr__(self):
+        return self.date.strftime("%y-%m-%d %H:%M")
+
+class Objective(models.Model):
+    expo = models.FloatField('exposure')
+    delay = models.FloatField('delay',default=0)
+    target = models.ForeignKey(Target,blank=True,null=True,on_delete=models.CASCADE)
+    repeat = models.IntegerField('repeat', default=1)
+    notes = models.JSONField('notes',blank=True, default=emptyjson)
+    def totime(self):
+        return self.expo*self.repeat #total duration
+
+#class Radius(models.Model):
+#	tfrom = models.ForeignKey(Target,on_delete=models.CASCADE)
+#	tto = models.ForeignKey(Target,on_delete=models.CASCADE)
+#	dist = models.FloatField('distance')

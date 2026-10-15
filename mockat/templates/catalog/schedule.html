@@ -1,0 +1,14 @@
+
+<h1>Observation plan {{line}}</h1>
+<b>total {{length|floatformat:2}} min</b> starting {{obs.0.date}}
+<br/><a href="{% url 'schplot' line %}">plot it</a> / <a href="{% url 'sched' line %}?raw">download</a>
+<br/><a href="{% url 'sched' line %}?alt=2">calculate altitude</a>
+<dl>
+{% for o in obs %}
+<dt><a href="{% url 'src' o.target.pk %}">{{o.target}}</a> [RA/dec: {{o.target.pRA|floatformat:2}} / {{o.target.pdec|floatformat:2}}]</dt>
+<dd>{{o.date|date:'H:i:s'}} [{{o.expo}} s]
+{% if alt %} alt. {{o.altaz.alt.degree|floatformat:1}} deg {% endif %}
+</dd>
+{% endfor %}
+</dl>
+

@@ -1,0 +1,46 @@
+
+<h1>{{src.name}}</h1>
+<h2>Ra {{src.pRA|floatformat:4}} / dec {{src.pdec|floatformat:4}} </h2>
+
+group <b><a href="../?grp={{src.group}}">{{src.group}}</a></b>
+{% for n,m in src.notes.items %}
+<dt>{{n}}</dt>
+<dd>{{m}}</dd>
+{% endfor %}
+
+{% if src.mag1 %}<li> U mag {{src.mag1|floatformat:1}}</li>{% endif%}
+{% if src.mag0 %}<li> B mag {{src.mag0|floatformat:1}}</li>{% endif%}
+
+{% if src.notes.gaiaspectrum %}
+GAIA DR3 ID: {{src.notes.gaiaspectrum}}<br/>
+<iframe  width="500" height="300" src="http://cdsportal.unistra.fr/widgets/dataplot/dataplot.html?dataset_url_1=http%3A%2F%2Fcdsarc.cds.unistra.fr%2Fviz-bin%2Fvizgraph%3F-s%3DI%2F355%26amp%3B-i%3D.graph_sql_xpsamp%26amp%3BPos%3D202.42798835571-23.28126748095%26amp%3BSource%3D{{src.notes.gaiaspectrum}}%26amp%3B--output%3Dvotable%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20&option_graph_title=I%2F355%20BP%2FRP%20spectrum%20of%20Gaia%20DR3%20{{src.notes.gaiaspectrum}}&option_axis_x_min=300&option_axis_x_max=1100&option_dataset_x_axis_1=Wavelength%20%5Bnm%5D&option_dataset_y_axis_1=%20Normalized%20flux&y_err_1=err&option_dataset_color_1=%230066FF&option_axis_y_min=1e-15&option_axis_y_max=1e-10&option_axis_y_log=true"></iframe>
+{% endif%}
+
+<br/>
+{% if src.objective_set.count %}
+<h4>Objectives:</h4>
+<ul>
+{% for p in src.objective_set.all %}
+<li>repeat {{p.repeat}} obs. of {{p.expo}} sec.</li>
+{% endfor %}
+</ul>
+{% endif %}
+
+{% if src.schedule_set.count %}
+<h4>Schedules:</h4>
+<ul>
+{% for p in src.schedule_set.all %}
+<li>from {{p.date}} <a href="{% url 'sched' p.time|floatformat:0 %}">line {{p.time}}</a></li>
+{% endfor %}
+</ul>
+{% endif %}
+
+<br/>
+{% if near %}
+{% for tg in near %}
+{{tg}} | {% endfor %}
+{% endif %}
+
+{% if time %}
+for time {{time}}
+{% endif %}

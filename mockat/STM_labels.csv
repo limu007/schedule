@@ -1,0 +1,36 @@
+kilonovae detection;KN;primary;Discover new kilonovae or do follow-up observations of already detected kilonovae and determine their near-UV brightness evolution, during the first day after their explosion, out to a distance of 200 Mpc to distinguish between different explosion scenarios.
+atmosphere opacities;ST;star:opacity;Test of the model atmosphere opacities
+BA star surface;ST;star:BA;Understanding the surface structure in normal BA stars
+cool chromosperic cycles;ST;star:chromo;Understanding the cyclical chromospheric activity  in cool stars
+peculiar warps;ST;star:warps;Understanding the nature of warps in the light curves of chemically peculiar stars
+wind instabil;ST;star:windinst;Determining the drivers of line-driven wind instability
+Be mass loss;ST;star:Be;Unveiling the mass-loss histories of Be stars, B[e] stars and evolved massive stars
+cool evolution;ST;star:evol;Determining the variations of chromospheric activity of cool stars during their evolution
+cool SG loss;ST;star:SG;Understanding the mass-loss mechanism in cool supergiants
+pulsating models;ST;star:pulse;Testing models of pulsating stars
+disc model;AG;agn:;Constraining accretion-disc models from low-luminosity to high-luminosity AGN
+TDE physics;AG;agn:tde;Time evolution and physics of tidal disruption events
+change look;AG;agn:look;Understanding changing-look AGN
+symbiotic stats;BN;bin:;Statistical study of the properties of the symbiotic star population
+massive binaries;BN;bin:mass;How the massive binaries or multiple systems are created and evolved in environments with different metallicity (Galaxy, SMC, LMC).  Evaluation of an evolutionary model for high mass binaries using new precise UV photometry.
+common envelope;BN;bin:enve;Occurrence rate of PCEBs with early-type components, search for this kind of progenitors of exploding stars or mergers.
+non-magnetic CVs;BN;bin:nomag;Determine the accretion rate of SW~Sex stars, compare it to previous observations, identify signs of an accretion rate decrease, and determine the dependency of accretion rate on the orbital period.
+RS-CVn stars;BN;bin:RSCVn;Evolution of energy loops and magnetic activity and their impact on the formation of active regions and stellar spot creation.
+reflection effect in binaries;BN;bin:refl;What is the amount of scattered light? What is the efficiency of the day-night heat transport in the irradiated stars/exoplanets? What is the structure and radiation field of the irradiated atmosphere? How does it affect the albedo, convection, shape of the star, gravity and limb darkening? How does the reflection effect affect stellar and planetary evolution?
+early SED;GB;grb:sed;Determine the early afterglow SED and its changes in flares and rebrightenings to constrain where the afterglow is produced.
+redshift/extinction;GB;grb:rsh;Constrain the redshift and intrinsic extinction
+prior properties;SN;sn:prior;Determining the physical properties of massive stars prior to supernova explosion. Early UV observations of explosions occurring in thick circumstellar medium would probe the final stages of massive star evolution.
+superluminous circumstellar;SN;sn:circ;UV observations of superluminous supernovae at later times are important for measuring the total luminosity and probing the (often unexpected or even paradox) circumstellar matter distribution in the wider surroundings of massive stars.
+CV strong episodic;SN;sn:CV;"Study the complex physics governing the various classes of cataclysmic variables (""classical"" novae) CVs have strong episodic outbursts that manifest as many-magnitude flares in the blue and UV bands."
+temp vs age;NS;pulsar:;Determine the effective temperatures of neutron stars in dependence on their age and estimate heating and cooling effects. Understand processes that are responsible for heating of neutron stars
+pulsar emission;NS;pulsar:Magnetar;Study where and how the pulsar and magnetar emission formes
+FRB counterparts;NS;pulsar:FRB;Analyze the properties of fast radio bursts counterparts and compare them with emissions observed for magnetars. Determine properties of those objects.
+SED + extinction;SC;clus:sed;Use magnitudes in UV together with the results for other photometric bands (UBV, SDSS, Gaia, 2MASS) with the aim to gain information about SED and derive extinction curves.
+bow shock counterpart;SC;clus:bow;Starting with the targets around which bow shocks were detected in IR, search for the UV equivalent in the flux images and identify the source of the UV radiation by comparing observed flux and structures with theoretical predictions.
+color-mag diags;SC;clus:colmag;Deriving photometric magnitudes of individual stars in open clusters, constructing colour-magnitude and colour-colour diagrams, comparing UV observations with other bands (optical, IR) and theoretical evolutionary tracks.
+integrated models;SC;clus:model;Focusing on distant star clusters in our Milky Way (and in other galaxies), integrated photometry allows us to characterize star clusters in a precise way using synthetic colours. The combination of already available optical and new UV photometry significantly increases the precision due to the small sensitivity to the shape of the extinction curve. To reach the goals, we will use available population synthesis codes to model different star clusters. We can mainly estimate the total masses, ratios of main sequence stars to giants, ages, and possibly metallicities.
+merger orientation;MG;merg:;Determination of the orientation of FS CMa stars (the disk-on/-off view). 
+dusted mergers;MG;merg:dust;Molecule and dust formation 
+disk material ejecta;MG;merg:eject;Detection of the material ejecta from the disk (effect of the Rosby waves) 
+surface material;MG;merg:surf;Detection of material ejecta from the surface (beating effect of pulsations)
+;;; 

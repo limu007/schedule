@@ -1,0 +1,39 @@
+
+{% if grpname %}
+<small><a href="/mockat/">home</a></small>
+
+    <h2>{{grpname}}</h2>
+    <small>{{desc}}</small>
+    <h3>Targets:</h3>
+    {% if table %}
+    <table>
+	<th><td>U mag</td><td>B mag</td><td>V mag</td></th>
+	{% if lims %}
+	<tr><td><b>max</b></td>{% for l in lims %}<td>{{l|floatformat:2}}</td>{% endfor %}</tr>
+	{% endif %}
+	{% for t in targets %}
+	<tr><td><a href="http://simbad.u-strasbg.fr/simbad/sim-id?Ident={{t.name}}&NbIdent=1&Radius=2&Radius.unit=arcmin&submit=submit+id">{{t.name}}</a></td><td>{{t.mag1|floatformat:2}}</td><td>{{t.mag0|floatformat:2}}</td><td>{{t.magV|floatformat:2}}</td></tr>
+	{% endfor %}
+    </table>
+    {% else %}
+    <small><a href="./?grp={{grpid}}&mags=3">to mags</a></small>
+      {% for t in targets %}
+        <li><a href="{% url 'src' t.pk %}">{{t.name}}</a>
+          [ {{t.pRA|floatformat:3}}, {{t.pdec|floatformat:3}} ] / {{t.all_plans}} min</li>
+      {% endfor %}
+    {%endif%}
+{% else %}
+    <h2>Objectives</h2>
+    {{cntall}} targets in total
+    {% for c in census %}
+        {% if c.2 > 0 %}
+            {% if stats %}
+	    <li>{{c.1}} /{{c.3}}/ <a href="./?grp={{c.0}}{{extra}}">{{c.2}} targets</a> [total {{c.4}} min]</li>
+            {% else %}
+	    <li>{{c.1}} /{{c.3}}/ <a href="./?grp={{c.0}}{{extra}}">{{c.2}} targets</a></li>
+            {% endif %}
+        {% endif %}
+    {% endfor %}
+
+{% endif %}
+    <br/>
