@@ -114,6 +114,119 @@ class VisibilityCache:
                                      dtype=object),
                  allvis=self.allvis)
 
+    # -------------------------------------------------------------- merging
+
+    def copy(self):
+        """Independent copy (no file access, nothing recomputed)."""
+        new = object.__new__(type(self))
+        new.path = self.path
+        new.tle = self.tle
+        new.sat = self.sat
+        new.segments = list(self.segments)
+        new.periods = list(self.periods)
+        new.period_pks = [set(p) for p in self.period_pks]
+        new.allvis = {k: list(v) for k, v in self.allvis.items()}
+        return new
+
+    def __add__(self, other):
+        """cache_a + cache_b -> new merged cache (path taken from cache_a);
+        see merge()."""
+        if not isinstance(other, VisibilityCache):
+            return NotImplemented
+        return self.copy().merge(other)
+
+    def __iadd__(self, other):
+        if not isinstance(other, VisibilityCache):
+            return NotImplemented
+        return self.merge(other)
+
+    def merge(self, other, tol: float = 2.):
+        """Merge `other` into this cache in place and return self.
+
+        Both caches must be built for the same TLE. Periods of `other`
+        that do not overlap any of ours are copied over with their samples.
+        Overlapping periods (the same eclipse, possibly with boundaries
+        differing by truncation at a horizon segment edge) are fused into
+        one period spanning both; its sample stamps are the union of both
+        grids and at every stamp the visible set is the union of what each
+        cache sees there. A cache that has no sample at that exact stamp
+        contributes its nearest sample within the same period -- the same
+        nearest-key lookup the scheduler uses -- since fill_times' grids
+        differ between target sets and cannot be matched one-to-one.
+        """
+        if other.tle != self.tle:
+            raise ValueError("cannot merge visibility caches built for "
+                             "different TLEs")
+        if other is self:
+            return self
+        dtol = timedelta(seconds=tol)
+
+        def stamps(cache):
+            return sorted((datetime.fromisoformat(k), k) for k in cache.allvis)
+
+        def samples(stamped, p0, p1):
+            """Sorted [(datetime, iso-stamp)] of samples in [p0, p1]."""
+            return [s for s in stamped if p0 - dtol <= s[0] <= p1 + dtol]
+
+        our_stamped, their_stamped = stamps(self), stamps(other)
+
+        def nearest(smp, t):
+            """Iso-stamp of the sample in smp closest to t (smp non-empty)."""
+            import bisect
+            i = bisect.bisect_left([s[0] for s in smp], t)
+            cand = [j for j in (i - 1, i) if 0 <= j < len(smp)]
+            return smp[min(cand, key=lambda j: abs(smp[j][0] - t))][1]
+
+        for (q0, q1), qpks in zip(other.periods, other.period_pks):
+            over = [i for i, (p0, p1) in enumerate(self.periods)
+                    if p0 < q1 + dtol and p1 > q0 - dtol]
+            theirs = samples(their_stamped, q0, q1)
+            if not over:
+                self.periods.append((q0, q1))
+                self.period_pks.append(set(qpks))
+                for t, k in theirs:
+                    self.allvis[k] = sorted(set(self.allvis.get(k, ()))
+                                            | set(other.allvis[k]))
+                our_stamped = stamps(self)
+                continue
+
+            # fuse all our overlapping periods with the incoming one
+            spans = [self.periods[i] for i in over]
+            n0 = min([q0] + [a for a, _ in spans])
+            n1 = max([q1] + [b for _, b in spans])
+            npks = set(qpks).union(*(self.period_pks[i] for i in over))
+            ours = sorted({s for a, b in spans
+                           for s in samples(our_stamped, a, b)})
+            ourvis = {k: self.allvis[k] for _, k in ours}
+
+            merged = {}
+            for t, k in sorted(set(ours) | set(theirs)):
+                vis = set()
+                for smp, vdict, spans_ in ((ours, ourvis, spans),
+                                           (theirs, other.allvis, [(q0, q1)])):
+                    if smp and any(a - dtol <= t <= b + dtol
+                                   for a, b in spans_):
+                        vis |= set(vdict[k] if k in vdict
+                                   else vdict[nearest(smp, t)])
+                merged[k] = sorted(vis)
+            for _, k in ours:
+                del self.allvis[k]
+            self.allvis.update(merged)
+            our_stamped = stamps(self)
+
+            for i in sorted(over, reverse=True):
+                del self.periods[i]
+                del self.period_pks[i]
+            self.periods.append((n0, n1))
+            self.period_pks.append(npks)
+
+        order = np.argsort([p[0] for p in self.periods])
+        self.periods = [self.periods[i] for i in order]
+        self.period_pks = [self.period_pks[i] for i in order]
+        for a, b in other.segments:
+            self._add_segment(a, b)
+        return self
+
     def targcount(self, around):
         from datetime import datetime
         from collections import Counter
