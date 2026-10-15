@@ -1,0 +1,5 @@
+django v>6.1
+ortools
+sgp4
+astropy
+scipy
